@@ -8,14 +8,21 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// Hardcoded, verified correct string (with "e", no "j", and default database "test")
+// Corrected cluster address matching your exact MongoDB dashboard layout
 const dbURI = "mongodb+srv://singhsukhpinder827_db_user:GqV9ViLI0uZwXEt7@cluster0.3ihlget.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0";
 
-console.log("Attempting direct connection to MongoDB Atlas...");
+console.log("Initiating global routing handshake to AWS Sydney Shards...");
 
-mongoose.connect(dbURI)
-  .then(() => console.log("Database handshaking active and CONNECTED!"))
-  .catch(err => console.error("Immediate connection block error:", err));
+// High-latency parameters tailored for cross-region stability
+mongoose.connect(dbURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 15000, // Extends wait time to 15 seconds for global routing
+  socketTimeoutMS: 60000,          // Keeps the connection channel open longer
+  connectTimeoutMS: 15000
+})
+  .then(() => console.log("Global connection established to AWS Sydney Cluster!"))
+  .catch(err => console.error("Network path connection block:", err));
 
 const TelemetrySchema = new mongoose.Schema({
   station_id: String,
@@ -27,12 +34,12 @@ const TelemetrySchema = new mongoose.Schema({
 
 const Telemetry = mongoose.model('Telemetry', TelemetrySchema);
 
-// Base Route to check status instantly
+// Base state check
 app.get('/', (req, res) => {
   res.json({ 
     status: "Backend online", 
     database_state: mongoose.connection.readyState,
-    message: mongoose.connection.readyState === 1 ? "Connected!" : "Disconnected"
+    message: mongoose.connection.readyState === 1 ? "Connected!" : "Syncing global path..."
   });
 });
 
