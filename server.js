@@ -8,12 +8,14 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// Use the clean, direct string structure
-const dbURI = "mongodb://singhsukhpinder827_db_user:GqV9ViLI0uZwXEt7@ac-mvh7i5b-shard-00-00.3ihlget.mongodb.net:27017,ac-mvh7i5b-shard-00-01.3ihlget.mongodb.net:27017,ac-mvh7i5b-shard-00-02.3ihlget.mongodb.net:27017/test?ssl=true&replicaSet=atlas-shard-0&authSource=admin&retryWrites=true&w=majority";
+// Force Render to handle the connection string securely at the system level
+const dbURI = process.env.MONGODB_URI;
 
-mongoose.connect(dbURI, {
-  serverSelectionTimeoutMS: 5000 // Force it to crash immediately if it fails so we see the exact error
-})
+if (!dbURI) {
+  console.error("CRITICAL ERROR: MONGODB_URI environment variable is missing!");
+}
+
+mongoose.connect(dbURI)
   .then(() => console.log("Database handshaking active!"))
   .catch(err => console.error("Immediate connection block:", err));
 
@@ -27,24 +29,22 @@ const TelemetrySchema = new mongoose.Schema({
 
 const Telemetry = mongoose.model('Telemetry', TelemetrySchema);
 
-// Fallback Status Check Endpoint
+// Base Route to check status instantly
 app.get('/', (req, res) => {
-  res.json({ status: "Backend online", database_state: mongoose.connection.readyState });
+  res.json({ 
+    status: "Backend online", 
+    database_state: mongoose.connection.readyState,
+    message: mongoose.connection.readyState === 1 ? "Connected!" : "Disconnected"
+  });
 });
 
-// Cleaned up GET Route
 app.get('/telemetry', async (req, res) => {
-  // If the database connection isn't ready, don't let it hang!
-  if (mongoose.connection.readyState !== 1) {
-    return res.status(503).json({ 
-      error: "Database is not connected yet", 
-      connection_state: mongoose.connection.readyState 
-    });
-  }
-
   try {
-    const data = await Telemetry.find({}).limit(10);
-    res.json(data);
+    const stations = ['STN-001', 'STN-002', 'STN-003']; 
+    const latestLogs = await Promise.all(stations.map(async (id) => {
+      return await Telemetry.findOne({ station_id: id }).sort({ timestamp: -1 });
+    }));
+    res.json(latestLogs.filter(log => log !== null));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
