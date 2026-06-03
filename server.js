@@ -8,16 +8,14 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// Force Render to handle the connection string securely at the system level
-const dbURI = process.env.MONGODB_URI;
+// Hardcoded, verified correct string (with "e", no "j", and default database "test")
+const dbURI = "mongodb+srv://singhsukhpinder827_db_user:GqV9ViLI0uZwXEt7@cluster0.3ihlget.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0";
 
-if (!dbURI) {
-  console.error("CRITICAL ERROR: MONGODB_URI environment variable is missing!");
-}
+console.log("Attempting direct connection to MongoDB Atlas...");
 
 mongoose.connect(dbURI)
-  .then(() => console.log("Database handshaking active!"))
-  .catch(err => console.error("Immediate connection block:", err));
+  .then(() => console.log("Database handshaking active and CONNECTED!"))
+  .catch(err => console.error("Immediate connection block error:", err));
 
 const TelemetrySchema = new mongoose.Schema({
   station_id: String,
