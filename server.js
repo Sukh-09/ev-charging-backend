@@ -9,7 +9,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 5000;
 
 // Connect to your live MongoDB Atlas Cloud Database
-const dbURI = "mongodb://singhsukhpinder827_db_user:GqV9ViLI0uZwXEt7@ac-mvh7i5b-shard-00-00.3ihlget.mongodb.net:27017,ac-mvh7i5b-shard-00-01.3ihlget.mongodb.net:27017,ac-mvh7i5b-shard-00-02.3ihlget.mongodb.net:27017/?ssl=true&replicaSet=atlas-shard-0&authSource=admin&retryWrites=true&w=majority";
+const dbURI = "mongodb+srv://singhsukhpinder827_db_user:GqV9ViLI0uZwXEt7@cluster0.3ihlget.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0";
 mongoose.connect(dbURI)
   .then(() => console.log("Connected to MongoDB Atlas Cloud Success!"))
   .catch(err => console.error("Database connection error:", err));
