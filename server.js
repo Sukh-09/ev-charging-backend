@@ -8,21 +8,16 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// Corrected cluster address matching your exact MongoDB dashboard layout
-const dbURI = "mongodb+srv://singhsukhpinder827_db_user:GqV9ViLI0uZwXEt7@cluster0.3ihlget.mongodb.net/test?retryWrites=true&w=majority&appName=Cluster0";
+// Direct, explicit shard connection routing to cross the Pacific to AWS Sydney safely
+const dbURI = "mongodb://singhsukhpinder827_db_user:GqV9ViLI0uZwXEt7@ac-mvh7i5b-shard-00-00.3ihlget.mongodb.net:27017,ac-mvh7i5b-shard-00-01.3ihlget.mongodb.net:27017,ac-mvh7i5b-shard-00-02.3ihlget.mongodb.net:27017/test?ssl=true&replicaSet=atlas-shard-0&authSource=admin&retryWrites=true&w=majority";
 
-console.log("Initiating global routing handshake to AWS Sydney Shards...");
+console.log("Routing direct tunnel to AWS Sydney Shards...");
 
-// High-latency parameters tailored for cross-region stability
 mongoose.connect(dbURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  serverSelectionTimeoutMS: 15000, // Extends wait time to 15 seconds for global routing
-  socketTimeoutMS: 60000,          // Keeps the connection channel open longer
-  connectTimeoutMS: 15000
+  serverSelectionTimeoutMS: 15000 // Give the cross-region connection 15 seconds to handshake
 })
-  .then(() => console.log("Global connection established to AWS Sydney Cluster!"))
-  .catch(err => console.error("Network path connection block:", err));
+  .then(() => console.log("Database handshaking active and CONNECTED! 🎉"))
+  .catch(err => console.error("Database connection error:", err));
 
 const TelemetrySchema = new mongoose.Schema({
   station_id: String,
@@ -34,12 +29,12 @@ const TelemetrySchema = new mongoose.Schema({
 
 const Telemetry = mongoose.model('Telemetry', TelemetrySchema);
 
-// Base state check
+// Base Route to check status instantly
 app.get('/', (req, res) => {
   res.json({ 
     status: "Backend online", 
     database_state: mongoose.connection.readyState,
-    message: mongoose.connection.readyState === 1 ? "Connected!" : "Syncing global path..."
+    message: mongoose.connection.readyState === 1 ? "Connected!" : "Disconnected"
   });
 });
 
