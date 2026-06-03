@@ -8,14 +8,12 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 
-// Direct, explicit shard connection routing to cross the Pacific to AWS Sydney safely
+// Completely direct routing to bypass Render's broken DNS lookup layer entirely
 const dbURI = "mongodb://singhsukhpinder827_db_user:GqV9ViLI0uZwXEt7@ac-mvh7i5b-shard-00-00.3ihlget.mongodb.net:27017,ac-mvh7i5b-shard-00-01.3ihlget.mongodb.net:27017,ac-mvh7i5b-shard-00-02.3ihlget.mongodb.net:27017/test?ssl=true&replicaSet=atlas-shard-0&authSource=admin&retryWrites=true&w=majority";
 
-console.log("Routing direct tunnel to AWS Sydney Shards...");
+console.log("CRITICAL: Booting up server using hardcoded direct routing layout...");
 
-mongoose.connect(dbURI, {
-  serverSelectionTimeoutMS: 15000 // Give the cross-region connection 15 seconds to handshake
-})
+mongoose.connect(dbURI)
   .then(() => console.log("Database handshaking active and CONNECTED! 🎉"))
   .catch(err => console.error("Database connection error:", err));
 
@@ -29,7 +27,6 @@ const TelemetrySchema = new mongoose.Schema({
 
 const Telemetry = mongoose.model('Telemetry', TelemetrySchema);
 
-// Base Route to check status instantly
 app.get('/', (req, res) => {
   res.json({ 
     status: "Backend online", 
